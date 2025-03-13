@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Agendamento - Portal do Paciente</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background-image: linear-gradient(to left, blue, lightgreen);
+            color: white;
+            padding: 15px 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+        
+        .user-info span {
+            margin-right: 10px;
+        }
+        
+        .user-badge {
+            background-color: #4285f4;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+        
+        .tabs {
+            display: flex;
+            margin: 20px 0;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            margin-right: 5px;
+            border-radius: 5px 5px 0 0;
+        }
+        
+        .tab.active {
+            background-color: #1a73e8;
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 20px;
+            background: white;
+            border-radius: 0 0 5px 5px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 15px;
+        }
+        
+        .form-control:focus {
+            border-color: #1a73e8;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background-color: #1a73e8;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #1557b0;
+        }
+        
+        .btn-danger {
+            background-color: #ea4335;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background-color: #d33426;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        th {
+            background-color: #f5f7fa;
+            font-weight: 600;
+        }
+        
+        tr:hover {
+            background-color: #f9f9f9;
+        }
+        
+        .status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .status-pending {
+            background-color: #ffedd5;
+            color: #d97706;
+        }
+        
+        .status-confirmed {
+            background-color: #dcfce7;
+            color: #16a34a;
+        }
+        
+        .status-canceled {
+            background-color: #fee2e2;
+            color: #dc2626;
+        }
+        
+        .alert {
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .alert-success {
+            background-color: #dcfce7;
+            color: #16a34a;
+            border-left: 4px solid #16a34a;
+        }
+        
+        .alert-danger {
+            background-color: #fee2e2;
+            color: #dc2626;
+            border-left: 4px solid #dc2626;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 20px;
+            width: 50%;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+        
+        .close {
+            font-size: 24px;
+            cursor: pointer;
+        }
+        
+        .doctor-card {
+            display: flex;
+            padding: 15px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .doctor-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: #e0e0e0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: 15px;
+        }
+        
+        .doctor-info {
+            flex: 1;
+        }
+        
+        .doctor-name {
+            font-weight: 600;
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+        
+        .doctor-specialty {
+            color: #666;
+            margin-bottom: 8px;
+        }
+        
+        .doctor-schedule {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .time-slot {
+            padding: 5px 10px;
+            background-color: #f0f7ff;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        
+        .time-slot:hover {
+            background-color: #1a73e8;
+            color: white;
+        }
+        
+        .profile-section {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .profile-image {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background-color: #e0e0e0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 48px;
+            color: #999;
+        }
+        
+        .profile-details {
+            flex: 1;
+        }
+        
+        .profile-name {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .notification {
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .notification-dot {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 10px;
+            height: 10px;
+            background-color: #ea4335;
+            border-radius: 50%;
+        }
+        
+        @media (max-width: 768px) {
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .tab {
+                margin-bottom: 5px;
+                border-radius: 5px;
+            }
+            
+            .modal-content {
+                width: 90%;
+            }
+            
+            .profile-section {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .profile-details {
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container header-content">
+            <div class="logo">Portal do Paciente</div>
+            <div class="user-info">
+                <span id="notification" class="notification">
+                    📣
+                    <span class="notification-dot"></span>
+                </span>
+                <span style="margin: 0 15px;">|</span>
+                <span id="user-name">Olá, Maria Silva</span>
+                <div class="user-badge">Paciente</div>
+            </div>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div class="tabs">
+            <div class="tab active" data-tab="tab-inicio">Início</div>
+            <div class="tab" data-tab="tab-agendamento">Agendar Consulta</div>
+            <div class="tab" data-tab="tab-minhas-consultas">Minhas Consultas</div>
+            <div class="tab" data-tab="tab-perfil">Meu Perfil</div>
+        </div>
+        
+        <div id="alert" class="alert"></div>
+        
+        <div id="tab-inicio" class="tab-content active">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Bem-vindo ao Portal do Paciente</h2>
+                </div>
+                <p>Olá Maria, seja bem-vinda ao seu portal de agendamentos. Aqui você pode:</p>
+                <ul style="margin: 15px 0 15px 20px;">
+                    <li>Agendar novas consultas com diversos especialistas</li>
+                    <li>Verificar suas consultas agendadas</li>
+                    <li>Cancelar ou remarcar seus agendamentos</li>
+                    <li>Atualizar suas informações pessoais</li>
+                </ul>
+                
+                <div style="margin-top: 20px;">
+                    <h3>Próxima Consulta</h3>
+                    <div class="doctor-card" style="margin-top: 10px;">
+                        <div class="doctor-image">👨‍⚕️</div>
+                        <div class="doctor-info">
+                            <div class="doctor-name">Dr. Ricardo Cardoso</div>
+                            <div class="doctor-specialty">Cardiologia</div>
+                            <div><strong>Data:</strong> 12/03/2025</div>
+                            <div><strong>Horário:</strong> 09:00</div>
+                            <div><strong>Status:</strong> <span class="status status-pending">Pendente</span></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <h3>Exames Recentes</h3>
+                    <p style="color: #666; margin-top: 10px;">Nenhum exame realizado recentemente.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div id="tab-agendamento" class="tab-content">
+            <h2>Agendar Nova Consulta</h2>
+            
+            <div class="form-group">
+                <label for="especialidade">Especialidade Médica</label>
+                <select id="especialidade" class="form-control" required>
+                    <option value="">Selecione uma especialidade</option>
+                    <option value="Clínico Geral">Clínico Geral</option>
+                    <option value="Cardiologia">Cardiologia</option>
+                    <option value="Ortopedia">Ortopedia</option>
+                    <option value="Oftalmologia">Oftalmologia</option>
+                    <option value="Dermatologia">Dermatologia</option>
+                    <option value="Neurologia">Neurologia</option>
+                </select>
+            </div>
+            
+            <div id="medicos-disponiveis">
+                <h3 style="margin: 20px 0 10px 0;">Médicos Disponíveis</h3>
+                
+                <div class="doctor-card">
+                    <div class="doctor-image">👨‍⚕️</div>
+                    <div class="doctor-info">
+                        <div class="doctor-name">Dr. Ricardo Cardoso</div>
+                        <div class="doctor-specialty">Cardiologia</div>
+                        <div>Atende: Segunda a Sexta</div>
+                        <div class="doctor-schedule">
+                            <div class="time-slot">13/03 - 08:00</div>
+                            <div class="time-slot">13/03 - 09:00</div>
+                            <div class="time-slot">13/03 - 10:00</div>
+                            <div class="time-slot">14/03 - 08:00</div>
+                            <div class="time-slot">14/03 - 09:00</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="doctor-card">
+                    <div class="doctor-image">👩‍⚕️</div>
+                    <div class="doctor-info">
+                        <div class="doctor-name">Dra. Cláudia Mendes</div>
+                        <div class="doctor-specialty">Cardiologia</div>
+                        <div>Atende: Terça, Quinta e Sexta</div>
+                        <div class="doctor-schedule">
+                            <div class="time-slot">15/03 - 13:00</div>
+                            <div class="time-slot">15/03 - 14:00</div>
+                            <div class="time-slot">15/03 - 15:00</div>
+                            <div class="time-slot">19/03 - 13:00</div>
+                            <div class="time-slot">19/03 - 14:00</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="tab-minhas-consultas" class="tab-content">
+            <h2>Minhas Consultas Agendadas</h2>
+            
+            <div class="form-group">
+                <select id="filtro-consultas" class="form-control">
+                    <option value="todas">Todas as consultas</option>
+                    <option value="pendentes">Pendentes</option>
+                    <option value="confirmadas">Confirmadas</option>
+                    <option value="canceladas">Canceladas</option>
+                    <option value="realizadas">Realizadas</option>
+                </select>
+            </div>
+            
+            <table id="tabela-minhas-consultas">
+                <thead>
+                    <tr>
+                        <th>Especialidade</th>
+                        <th>Médico</th>
+                        <th>Data</th>
+                        <th>Horário</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Cardiologia</td>
+                        <td>Dr. Ricardo Cardoso</td>
+                        <td>12/03/2025</td>
+                        <td>09:00</td>
+                        <td><span class="status status-pending">Pendente</span></td>
+                        <td>
+                            <button class="btn btn-danger btn-cancelar">Cancelar</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Ortopedia</td>
+                        <td>Dr. Paulo Oliveira</td>
+                        <td>03/02/2025</td>
+                        <td>14:00</td>
+                        <td><span class="status status-confirmed">Realizada</span></td>
+                        <td>
+                            <button class="btn btn-primary">Ver Detalhes</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div id="tab-perfil" class="tab-content">
+            <h2>Meu Perfil</h2>
+            
+            <div class="profile-section">
+                <div class="profile-image">MS</div>
+                <div class="profile-details">
+                    <div class="profile-name">Maria Silva</div>
+                    <div style="color: #666; margin-bottom: 20px;">
+                        Paciente desde Janeiro de 2023
+                    </div>
+                    
+                    <div style="margin-bottom: 5px;"><strong>CPF:</strong> 123.456.789-00</div>
+                    <div style="margin-bottom: 5px;"><strong>Email:</strong> maria@exemplo.com</div>
+                    <div style="margin-bottom: 5px;"><strong>Telefone:</strong> (81) 99876-5432</div>
+                    <div style="margin-bottom: 20px;"><strong>Endereço:</strong> Av. Principal, 123 - Bairro Central</div>
+                    
+                    <button class="btn btn-primary">Editar Informações</button>
+                </div>
+            </div>
+            
+            <div style="margin-top: 30px;">
+                <h3>Histórico Médico</h3>
+                <div class="card" style="margin-top: 15px;">
+                    <div class="card-header">
+                        <div class="card-title">Resumo</div>
+                    </div>
+                    <ul style="margin: 10px 0 10px 20px;">
+                        <li>Total de consultas: 7</li>
+                        <li>Última consulta: 03/02/2025 - Ortopedia</li>
+                        <li>Próxima consulta: 12/03/2025 - Cardiologia</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="cancelamento-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Confirmar Cancelamento</h2>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p>Você está cancelando sua consulta de:</p>
+                <p><strong>Especialidade:</strong> Cardiologia</p>
+                <p><strong>Médico:</strong> Dr. Ricardo Cardoso</p>
+                <p><strong>Data e hora:</strong> 12/03/2025 às 09:00</p>
+                
+                <div class="form-group" style="margin-top: 20px;">
+                    <label for="motivo-cancelamento">Motivo do Cancelamento</label>
+                    <select id="motivo-cancelamento" class="form-control">
+                        <option value="">Selecione um motivo</option>
+                        <option value="indisponibilidade">Não estarei disponível na data/horário</option>
+                        <option value="outro-medico">Prefiro outro médico</option>
+                        <option value="nao-preciso">Não preciso mais desta consulta</option>
+                        <option value="outro">Outro motivo</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="observacoes-cancelamento">Observações (opcional)</label>
+                    <textarea id="observacoes-cancelamento" class="form-control" rows="3"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer" style="margin-top: 20px; text-align: right;">
+                <button id="cancelar-acao" class="btn">Voltar</button>
+                <button id="confirmar-cancelamento" class="btn btn-danger">Confirmar Cancelamento</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="confirmacao-agendamento-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Agendamento Realizado</h2>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p style="margin-bottom: 15px;">Sua consulta foi agendada com sucesso!</p>
+                
+                <div style="background-color: #f5f7fa; padding: 15px; border-radius: 8px;">
+                    <p><strong>Especialidade:</strong> <span id="conf-especialidade">Cardiologia</span></p>
+                    <p><strong>Médico:</strong> <span id="conf-medico">Dr. Ricardo Cardoso</span></p>
+                    <p><strong>Data:</strong> <span id="conf-data">15/03/2025</span></p>
+                    <p><strong>Horário:</strong> <span id="conf-horario">09:00</span></p>
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <p><strong>Observações importantes:</strong></p>
+                    <ul style="margin: 10px 0 10px 20px;">
+                        <li>Chegue com 15 minutos de antecedência</li>
+                        <li>Traga sua carteira de identidade</li>
+                        <li>Traga exames anteriores (se tiver)</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="modal-footer" style="margin-top: 20px; text-align: right;">
+                <button id="fechar-confirmacao" class="btn btn-primary">Fechar</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Event listeners para as abas
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Remover classe active de todas as abas
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+                
+                // Adicionar classe active na aba clicada
+                tab.classList.add('active');
+                
+                // Mostrar conteúdo da aba
+                const tabId = tab.getAttribute('data-tab');
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+        
+        // Event listener para horários disponíveis
+        document.querySelectorAll('.time-slot').forEach(slot => {
+            slot.addEventListener('click', () => {
+                // Obter informações do médico e horário
+                const doctorCard = slot.closest('.doctor-card');
+                const doctorName = doctorCard.querySelector('.doctor-name').textContent;
+                const specialty = doctorCard.querySelector('.doctor-specialty').textContent;
+                const [date, time] = slot.textContent.split(' - ');
+                
+                // Preencher modal de confirmação
+                document.getElementById('conf-especialidade').textContent = specialty;
+                document.getElementById('conf-medico').textContent = doctorName;
+                document.getElementById('conf-data').textContent = date;
+                document.getElementById('conf-horario').textContent = time;
+                
+                // Mostrar modal de confirmação
+                document.getElementById('confirmacao-agendamento-modal').style.display = 'block';
+            });
+        });
+        
+        // Event listener para botões de cancelar consulta
+        document.querySelectorAll('.btn-cancelar').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.getElementById('cancelamento-modal').style.display = 'block';
+            });
+        });
+        
+        // Event listeners para fechar modais
+        document.querySelectorAll('.close, #cancelar-acao, #fechar-confirmacao').forEach(elem => {
+            elem.addEventListener('click', () => {
+                document.querySelectorAll('.modal').forEach(modal => {
+                    modal.style.display = 'none';
+                });
+            });
+        });
+        
+        // Event listener para confirmar cancelamento
+        document.getElementById('confirmar-cancelamento').addEventListener('click', () => {
+            // Aqui seria feita a chamada para API para cancelar a consulta
+            document.getElementById('cancelamento-modal').style.display = 'none';
+            
+            // Mostrar alerta de sucesso
+            const alert = document.getElementById('alert');
+            alert.textContent = 'Consulta cancelada com sucesso!';
+            alert.className = 'alert alert-success';
+            alert.style.display = 'block';
+            
+            setTimeout(() => {
+                alert.style.display = 'none';
+            }, 5000);
+        });
+        
+        // Event listener para notificações
+        document.getElementById('notification').addEventListener('click', () => {
+            alert('Você tem 1 notificação: Lembrete de consulta para amanhã com Dr. Ricardo Cardoso às 09:00.');
+            document.querySelector('.notification-dot').style.display = 'none';
+        });
+        
+        // Event listener para seleção de especialidade
+        document.getElementById('especialidade').addEventListener('change', function() {
+            const especialidade = this.value;
+            
+            // Em um sistema real, aqui seria feita uma chamada para API
+            // para buscar médicos disponíveis para a especialidade selecionada
+            
+            if (especialidade) {
+                document.getElementById('medicos-disponiveis').style.display = 'block';
+            } else {
+                document.getElementById('medicos-disponiveis').style.display = 'none';
+            }
+        });
+        
+        // Inicialização da página
+        window.onload = function() {
+            // Esconder a lista de médicos até que uma especialidade seja selecionada
+            document.getElementById('medicos-disponiveis').style.display = 'none';
+        };
+    </script>
+</body>
+</html>
